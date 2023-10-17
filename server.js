@@ -28,15 +28,34 @@ app.use(express.urlencoded({
   extended: true
 }));
 
-// ADD HERE THE REST OF THE ENDPOINTS
+function findUser(email) {
+  const results = db.data.users.filter(u => u.email == email)
+  if (results.length == 0) return undefined;
+  return results[0];
+}
 
+// ADD HERE THE REST OF THE ENDPOINTS
+app.post('/auth/register', (req, res) => {
+  const user = {
+    name: req.body.name,
+    email: req.body.email,
+    password: req.body.password
+  }
+  const userFound = findUser(user.email);
+  if (userFound) {
+    res.send({ ok: false, message: "User already exists" });
+  } else {
+    db.data.users.push(user);
+    db.write();
+    res.send({ok:true})
+   }
+})
 
 
 app.get("*", (req, res) => {
-    res.sendFile(__dirname + "public/index.html"); 
+    res.sendFile(__dirname + "public/index.html");
 });
 
 app.listen(port, () => {
   console.log(`App listening on port ${port}`)
 });
-
