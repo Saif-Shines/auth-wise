@@ -1,2 +1,23 @@
-/.vscode
-/node-modules
+# Node.js
+node_modules/
+
+# Visual Studio Code
+.vscode/
+
+# Environment variables
+.env
+
+# Log files
+*.log
+
+# Swap files
+*.swp
+
+# Dependency lock files
+package-lock.json
+yarn.lock
+
+# Build output
+dist/
+build/
+out/
