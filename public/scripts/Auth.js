@@ -2,38 +2,102 @@ import API from "./API.js";
 import Router from "./Router.js";
 
 const Auth = {
-    isLoggedIn: false,
-    account: null,
-    updateStatus() {
-        if (Auth.isLoggedIn && Auth.account) {
-            document.querySelectorAll(".logged_out").forEach(
-                e => e.style.display = "none"
-            );
-            document.querySelectorAll(".logged_in").forEach(
-                e => e.style.display = "block"
-            );
-            document.querySelectorAll(".account_name").forEach(
-                e => e.innerHTML = Auth.account.name
-            );
-            document.querySelectorAll(".account_username").forEach(
-                e => e.innerHTML = Auth.account.email
-            );
-
-        } else {
-            document.querySelectorAll(".logged_out").forEach(
-                e => e.style.display = "block"
-            );
-            document.querySelectorAll(".logged_in").forEach(
-                e => e.style.display = "none"
-            );
-
-        }
-    },    
-    init: () => {
-        
-    },
-}
+  isLoggedIn: false,
+  account: null,
+  async postLogin(response, user) {
+    if (response.ok) {
+      this.isLoggedIn = true;
+      this.account = user;
+      this.updateStatus();
+      Router.go("/account");
+    } else {
+      alert(response.message);
+    }
+    if (window.PasswordCredential && user.password) {
+      const credentials = new PasswordCredential({
+        id: user.email,
+        password: user.password,
+        name: user.name,
+      });
+      navigator.credentials.store(credentials);
+    }
+  },
+  async loginFromGoogle(data) {
+    const response = await API.loginFromGoogle({ credential: data });
+    this.postLogin(response, {
+      name: response.name,
+      email: response.email,
+    });
+  },
+  async register(event) {
+    event.preventDefault();
+    const user = {
+      name: document.getElementById("register_name").value,
+      email: document.getElementById("register_email").value,
+      password: document.getElementById("register_password").value,
+    };
+    const response = await API.register(user);
+    this.postLogin(response, user);
+  },
+  async login(event) {
+    if (event) event.preventDefault();
+    const credentials = {
+      email: document.getElementById("login_email").value,
+      password: document.getElementById("login_password").value,
+    };
+    const response = await API.login(credentials);
+    this.postLogin(response, {
+      ...credentials,
+      name: response.name,
+    });
+  },
+  async autoLogin() {
+    if (window.PasswordCredential) {
+      const credentials = await navigator.credentials.get({ password: true });
+      if (credentials) {
+        document.getElementById("login_email").value = credentials?.id;
+        document.getElementById("login_password").value = credentials?.password;
+        Auth.login();
+        console.log(credentials);
+      }
+    }
+  },
+  logout() {
+    this.isLoggedIn = false;
+    this.account = null;
+    this.updateStatus();
+    Router.go("/");
+    if (window.PasswordCredential) {
+      navigator.credentials.preventSilentAccess();
+    }
+  },
+  updateStatus() {
+    if (Auth.isLoggedIn && Auth.account) {
+      document
+        .querySelectorAll(".logged_out")
+        .forEach((e) => (e.style.display = "none"));
+      document
+        .querySelectorAll(".logged_in")
+        .forEach((e) => (e.style.display = "block"));
+      document
+        .querySelectorAll(".account_name")
+        .forEach((e) => (e.innerHTML = Auth.account.name));
+      document
+        .querySelectorAll(".account_username")
+        .forEach((e) => (e.innerHTML = Auth.account.email));
+    } else {
+      document
+        .querySelectorAll(".logged_out")
+        .forEach((e) => (e.style.display = "block"));
+      document
+        .querySelectorAll(".logged_in")
+        .forEach((e) => (e.style.display = "none"));
+    }
+  },
+  init: () => {},
+};
 Auth.updateStatus();
+Auth.autoLogin();
 
 export default Auth;
 

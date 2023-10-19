@@ -20,6 +20,13 @@
 
     <script src="scripts/app.js" type="module"></script>
 
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script>
+        function loginFromGoogle(data) {
+            Auth.loginFromGoogle(data)
+        }
+    </script>
+
 </head>
 
 <body>
@@ -53,7 +60,7 @@
             </section>
         </section>
 
-        <section class="page" id="register">
+        <section class="page" id="register" onsubmit="Auth.register(event)">
             <h2>Register</h2>
             <form id="formRegister">
                 <fieldset>
@@ -69,7 +76,7 @@
             </form>
         </section>
 
-        <section class="page" id="login">
+        <section class="page" id="login" onsubmit="Auth.login(event)">
             <h2>Log In</h2>
 
             <form id="formLogin">
@@ -85,6 +92,18 @@
                     <a href="/register" class="navlink">Register a new account instead</a>
                 </p>
 
+                </fieldset>
+
+                <fieldset>
+                    <div id="g_id_onload"
+                        data-client_id="174246153520-uthr4voggqjrru38fuedkhpmhitg491e.apps.googleusercontent.com"
+                        data-context="use" data-ux_mode="popup" data-callback="loginFromGoogle" data-auto_select="false"
+                        data-itp_support="false">
+                    </div>
+
+                    <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="filled_black"
+                        data-text="signin" data-size="medium" data-logo_alignment="left">
+                    </div>
                 </fieldset>
             </form>
         </section>
