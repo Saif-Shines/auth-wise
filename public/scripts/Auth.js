@@ -52,6 +52,23 @@ const Auth = {
       document.getElementById("login_section_webauthn").hidden = false;
     }
   },
+  addWebAuthn: async () => {
+    const options = await API.webAuthn.registrationOptions();
+    options.authenticatorSelection.residentKey = "required";
+    options.authenticatorSelection.requireResidentKey = true;
+    options.extensions = {
+      credProps: true,
+    };
+    const authRes = await SimpleWebAuthnBrowser.startRegistration(options);
+    const verificationRes = await API.webAuthn.registrationVerification(
+      authRes
+    );
+    if (verificationRes.ok) {
+      alert("You can now login using the registered method!");
+    } else {
+      alert(verificationRes.message);
+    }
+  },
   async login(event) {
     if (event) event.preventDefault();
     if (Auth.loginStep == 1) {
