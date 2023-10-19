@@ -37,6 +37,22 @@ function findUser(email) {
 }
 
 // ADD HERE THE REST OF THE ENDPOINTS
+
+app.post("/auth/auth-options", (req, res) => {
+  const foundUser = findUser(req.body.email);
+  if (foundUser) {
+    res.send({
+      password: foundUser.password != false,
+      google: foundUser.federated && foundUser.federated.google,
+      webauthn: foundUser.webauth,
+    });
+  } else {
+    res.send({
+      password: true,
+    });
+  }
+});
+
 app.post("/auth/login-google", (req, res) => {
   let jwt = jwtJsDecode.jwtDecode(req.body.credential.credential);
   let user = {
@@ -61,6 +77,7 @@ app.post("/auth/login-google", (req, res) => {
 
 app.post("/auth/login", (req, res) => {
   const userFound = findUser(req.body.email);
+  console.log("req", req.body);
   if (userFound) {
     if (bcrypt.compareSync(req.body.password, userFound.password)) {
       // respond with ok

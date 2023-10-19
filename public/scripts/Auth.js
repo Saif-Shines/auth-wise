@@ -4,6 +4,7 @@ import Router from "./Router.js";
 const Auth = {
   isLoggedIn: false,
   account: null,
+  loginStep: 1,
   async postLogin(response, user) {
     if (response.ok) {
       this.isLoggedIn = true;
@@ -39,17 +40,35 @@ const Auth = {
     const response = await API.register(user);
     this.postLogin(response, user);
   },
+  checkAuthnOptions: async () => {
+    const response = await API.checkAuthOptions({
+      email: document.getElementById("login_email").value,
+    });
+    Auth.loginStep = 2;
+    if (response.password) {
+      document.getElementById("login_section_password").hidden = false;
+    }
+    if (response.webauthn) {
+      document.getElementById("login_section_webauthn").hidden = false;
+    }
+  },
   async login(event) {
     if (event) event.preventDefault();
-    const credentials = {
-      email: document.getElementById("login_email").value,
-      password: document.getElementById("login_password").value,
-    };
-    const response = await API.login(credentials);
-    this.postLogin(response, {
-      ...credentials,
-      name: response.name,
-    });
+    if (Auth.loginStep == 1) {
+      console.info("check login options");
+      Auth.checkAuthnOptions();
+    } else {
+      // Step 2
+      const credentials = {
+        email: document.getElementById("login_email").value,
+        password: document.getElementById("login_password").value,
+      };
+      const response = await API.login(credentials);
+      this.postLogin(response, {
+        ...credentials,
+        name: response.name,
+      });
+    }
   },
   async autoLogin() {
     if (window.PasswordCredential) {
@@ -94,10 +113,14 @@ const Auth = {
         .forEach((e) => (e.style.display = "none"));
     }
   },
-  init: () => {},
+  init: () => {
+    document.getElementById("login_section_password").hidden = true;
+    document.getElementById("login_section_webauthn").hidden = true;
+  },
 };
 Auth.updateStatus();
 Auth.autoLogin();
+Auth.init();
 
 export default Auth;
 

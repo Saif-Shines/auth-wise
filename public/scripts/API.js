@@ -4,6 +4,9 @@ const API = {
   login: async function (user) {
     return await this.makePostRequest(`${this.endpoint}login`, user);
   },
+  checkAuthOptions: async (user) => {
+    return await API.makePostRequest(`${API.endpoint}auth-options`, user);
+  },
   loginFromGoogle: async (data) => {
     return await API.makePostRequest(`${API.endpoint}login-google`, data);
   },
